@@ -1,4 +1,4 @@
-package main
+package usercrud
 
 import (
 	"net/http"
@@ -8,9 +8,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
-func updateUser(c *gin.Context) {
+func UpdateUser(c *gin.Context, db *gorm.DB) {
 
 	if len(c.Request.URL.Query()) > 0 {
 		c.Status(http.StatusBadRequest)

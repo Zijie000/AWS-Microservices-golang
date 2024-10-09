@@ -1,4 +1,4 @@
-package main
+package usercrud
 
 import (
 	"net/http"
@@ -8,9 +8,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
-func registerUser(c *gin.Context) {
+func RegisterUser(c *gin.Context, db *gorm.DB) {
 
 	if c.Request.Method != http.MethodPost {
 		c.Header("Allow", "POST")
