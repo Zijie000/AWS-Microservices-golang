@@ -1,4 +1,4 @@
-package main
+package usercrud
 
 import (
 	"net/http"
@@ -8,9 +8,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"time"
+
+	"gorm.io/gorm"
 )
 
-func getUser(c *gin.Context) {
+func GetUser(c *gin.Context, db *gorm.DB) {
 
 	if c.Request.Method != http.MethodGet {
 		c.Header("Allow", "GET")

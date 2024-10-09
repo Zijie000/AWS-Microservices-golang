@@ -6,13 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"gorm.io/gorm"
+
+	"webapp/usercrud"
+
+	"webapp/mydb"
 )
 
 var db *gorm.DB
 
 func main() {
 	var err error
-	db, err = initDB()
+	db, err = mydb.InitDB()
 	if err != nil {
 		panic("Failed to connect to database!")
 	}
@@ -51,29 +55,20 @@ func NotSupported(c *gin.Context) {
 
 func healthCheck(c *gin.Context) {
 
-	if c.Request.Method != http.MethodGet {
-		c.Header("Allow", "GET")
-		c.Status(http.StatusMethodNotAllowed)
-		return
-	}
+	usercrud.HealthCheck(c, db)
+}
 
-	c.Header("Cache-Control", "no-cache")
+func registerUser(c *gin.Context) {
 
-	if len(c.Request.URL.Query()) > 0 {
-		c.Status(http.StatusBadRequest)
-		return
-	}
+	usercrud.RegisterUser(c, db)
+}
 
-	if c.Request.ContentLength > 0 {
-		c.Status(http.StatusBadRequest)
-		return
-	}
+func getUser(c *gin.Context) {
 
-	sqlDB, err := db.DB()
-	if err != nil || sqlDB.Ping() != nil {
-		c.Status(http.StatusServiceUnavailable)
-		return
-	}
+	usercrud.GetUser(c, db)
+}
 
-	c.Status(http.StatusOK)
+func updateUser(c *gin.Context) {
+
+	usercrud.UpdateUser(c, db)
 }
