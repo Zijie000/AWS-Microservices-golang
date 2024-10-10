@@ -22,6 +22,8 @@ func setupTestDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
+	db.AutoMigrate(&usercrud.User{})
+
 	return db, nil
 }
 

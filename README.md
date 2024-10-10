@@ -2,13 +2,13 @@
 This is for csye6225 project
 
 
-## Prerequisites
+## 🧙‍♂️Prerequisites
 
 🪄You need to install 🦫golang 1.10 ~ 1.23
 
 🪄You need to install mySQL (Any stable version within 10 years)
 
-## Build and Deploy
+## 🧌Build and Deploy
 
 🪄Get all golang/Gin dependencies needed
 ```bash
