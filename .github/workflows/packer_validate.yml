@@ -18,6 +18,9 @@ jobs:
       
       - name: Setup packer
         uses: hashicorp/setup-packer@main
+      
+      - name: Format packer
+        run: packer init webapp_ami_packer.pkr.hcl
 
       - name: Format packer
         run: packer fmt webapp_ami_packer.pkr.hcl
