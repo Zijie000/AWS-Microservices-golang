@@ -1,0 +1,13 @@
+[Unit]
+Description=WebApp Service
+After=network.target mysql.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStart=/opt/webapp
+User=csye6225
+Group=csye6225
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
