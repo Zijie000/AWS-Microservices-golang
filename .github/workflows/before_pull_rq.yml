@@ -1,7 +1,9 @@
 name:  Packer validate on Pull Request
 
 on:
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   before_pull_rq:

@@ -1,7 +1,9 @@
 name: Packer Build and Go test after Pull Request
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   after_pull_rq:
