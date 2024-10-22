@@ -26,10 +26,6 @@ variable "ami_name" {
   type = string
 }
 
-variable "mysql_pwd" {
-  type = string
-}
-
 packer {
   required_plugins {
     amazon = {
@@ -53,39 +49,6 @@ source "amazon-ebs" "webapp" {
 
 build {
   sources = ["source.amazon-ebs.webapp"]
-
-
-  provisioner "shell" {
-    inline = [
-      "sudo apt-get update",
-      "echo 'mysql-server mysql-server/root_password password ${var.mysql_pwd}' | sudo debconf-set-selections",
-      "echo 'mysql-server mysql-server/root_password_again password ${var.mysql_pwd}' | sudo debconf-set-selections",
-      "sudo apt-get install -y mysql-server",
-      "sudo systemctl enable mysql",
-      "sudo systemctl start mysql"
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
-      "sudo systemctl start mysql",
-      "mysql -u root -p${var.mysql_pwd} -e 'CREATE DATABASE test;'"
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
-      "echo 'Restarting MySQL service...'",
-      "sudo systemctl restart mysql"
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
-      "echo 'mysql_pwd=${var.mysql_pwd}' | sudo tee -a /etc/environment"
-    ]
-  }
-
 
   provisioner "file" {
     source      = "./webapp"

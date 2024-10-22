@@ -12,9 +12,11 @@ import (
 )
 
 func InitDB() (*gorm.DB, error) {
-	pwd := os.Getenv("mysql_pwd")
-	fmt.Print("password is:" + pwd)
-	dsn := "root:" + pwd + "@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+	dbPassword := os.Getenv("MYSQL_PWD")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	fmt.Print("password is:" + dbPassword)
+	dsn := "mysql://csye6225:" + dbPassword + "@" + dbHost + ":" + dbPort + "/csye6225"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
