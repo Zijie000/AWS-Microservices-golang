@@ -53,5 +53,4 @@ jobs:
             -var "ami_user=${{ secrets.AMI_USER }}" \
             -var "aws_profile=${{ secrets.AWS_PROFILE }}" \
             -var "ami_name=${{ secrets.AMI_NAME }}" \
-            -var "mysql_pwd=${{ secrets.DB_PWD }}" \
             webapp_ami_packer.pkr.hcl
