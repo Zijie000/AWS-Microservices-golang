@@ -14,9 +14,9 @@ import (
 func InitDB() (*gorm.DB, error) {
 	dbPassword := os.Getenv("MYSQL_PWD")
 	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
 	fmt.Print("password is:" + dbPassword)
-	dsn := "mysql://csye6225:" + dbPassword + "@" + dbHost + ":" + dbPort + "/csye6225"
+	fmt.Print("host is:" + dbHost)
+	dsn := "csye6225:" + dbPassword + "@tcp(" + dbHost + ")/csye6225?parseTime=true"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err

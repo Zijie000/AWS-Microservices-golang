@@ -10,6 +10,8 @@ import (
 	"fmt"
 
 	"gorm.io/gorm"
+
+	"regexp"
 )
 
 func RegisterUser(c *gin.Context, db *gorm.DB) {
@@ -41,6 +43,16 @@ func RegisterUser(c *gin.Context, db *gorm.DB) {
 		fmt.Print(2)
 		return
 
+	}
+
+	const emailRegex = `^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`
+
+	re := regexp.MustCompile(emailRegex)
+
+	if !re.MatchString(tmpUser.Email) {
+		c.Status(http.StatusBadRequest)
+		fmt.Print(0)
+		return
 	}
 
 	var existingUser User
