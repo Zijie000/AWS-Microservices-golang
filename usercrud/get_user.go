@@ -21,9 +21,9 @@ func GetUser(c *gin.Context, db *gorm.DB) {
 	start := time.Now()
 
 	err := observability.Client.Incr("Get User API", nil, 1)
-    if err != nil {
-        log.Printf("Error incrementing Get User API count: %v", err)
-    }
+	if err != nil {
+		log.Printf("Error incrementing Get User API count: %v", err)
+	}
 
 	if c.Request.Method != http.MethodGet {
 		c.Header("Allow", "GET")
@@ -47,10 +47,20 @@ func GetUser(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
+	startdb := time.Now()
+
 	var user User
 	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
 		c.Status(http.StatusUnauthorized)
 		return
+	}
+
+	durationdb := time.Since(startdb).Milliseconds()
+
+	err = observability.Client.Timing("api.response_time.GetUserAPIDataBase", time.Duration(durationdb)*time.Millisecond, nil, 1)
+
+	if err != nil {
+		log.Printf("Error recording Get User API DataBase timing: %v", err)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
@@ -76,12 +86,12 @@ func GetUser(c *gin.Context, db *gorm.DB) {
 
 	duration := time.Since(start).Milliseconds()
 
-	err = observability.Client.Timing("api.response_time.GetUserAPI", time.Duration(100+duration)*time.Millisecond, nil, 1)
+	err = observability.Client.Timing("api.response_time.GetUserAPI", time.Duration(duration)*time.Millisecond, nil, 1)
 
-    if err != nil {
-        log.Printf("Error recording Get User API timing: %v", err)
-    }
+	if err != nil {
+		log.Printf("Error recording Get User API timing: %v", err)
+	}
 
 	c.JSON(http.StatusOK, userInfo)
-	
+
 }
