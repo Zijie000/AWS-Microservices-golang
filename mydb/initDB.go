@@ -9,6 +9,8 @@ import (
 	"fmt"
 
 	"webapp/usercrud"
+
+	"webapp/profilepic"
 )
 
 func InitDB() (*gorm.DB, error) {
@@ -23,6 +25,7 @@ func InitDB() (*gorm.DB, error) {
 	}
 
 	db.AutoMigrate(&usercrud.User{})
+	db.AutoMigrate(&profilepic.Picture{})
 
 	return db, nil
 }

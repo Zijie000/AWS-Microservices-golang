@@ -1,0 +1,32 @@
+{
+    "agent": {
+      "metrics_collection_interval": 3,
+      "logfile": "/var/log/amazon-cloudwatch-agent.log",
+      "debug": true
+    },
+
+    "metrics": {
+      "namespace": "WebappMetrics",
+      "metrics_collected": {
+        "statsd": {
+          "service_address": ":8125",
+          "metrics_aggregation_interval": 3
+        }
+      }
+    },
+  
+  "logs": {
+        "logs_collected": {
+          "files": {
+            "collect_list": [
+              {
+                "file_path": "/var/log/webapp.log",
+                "log_group_name": "webapp",
+                "timezone": "UTC"
+              }
+            ]
+          }
+        }
+      }
+  
+  }

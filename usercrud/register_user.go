@@ -12,9 +12,22 @@ import (
 	"gorm.io/gorm"
 
 	"regexp"
+
+	"webapp/observability"
+
+	"log"
+
+	"time"
 )
 
 func RegisterUser(c *gin.Context, db *gorm.DB) {
+
+	start := time.Now()
+
+	err := observability.Client.Incr("Register User API", nil, 1)
+	if err != nil {
+		log.Printf("Error incrementing Register User API count: %v", err)
+	}
 
 	if c.Request.Method != http.MethodPost {
 		c.Header("Allow", "POST")
@@ -76,9 +89,19 @@ func RegisterUser(c *gin.Context, db *gorm.DB) {
 
 	user.Password = string(hashedPassword)
 
+	startdb := time.Now()
+
 	if result := db.Create(&user); result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
+	}
+
+	durationdb := time.Since(startdb).Milliseconds()
+
+	err = observability.Client.Timing("api.response_time.RegisterUserAPIDataBase", time.Duration(durationdb)*time.Millisecond, nil, 1)
+
+	if err != nil {
+		log.Printf("Error recording Register User API DataBase timing: %v", err)
 	}
 
 	userCreateInfo := struct {
@@ -91,5 +114,13 @@ func RegisterUser(c *gin.Context, db *gorm.DB) {
 		Email:     user.Email,
 	}
 
+	duration := time.Since(start).Milliseconds()
+
+	err = observability.Client.Timing("api.response_time.RegisterUserAPI", time.Duration(duration)*time.Millisecond, nil, 1)
+	if err != nil {
+		log.Printf("Error recording Register User API timing: %v", err)
+	}
+
 	c.JSON(http.StatusCreated, userCreateInfo)
+
 }

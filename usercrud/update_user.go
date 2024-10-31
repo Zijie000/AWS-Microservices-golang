@@ -10,9 +10,22 @@ import (
 	"fmt"
 
 	"gorm.io/gorm"
+
+	"webapp/observability"
+
+	"log"
+
+	"time"
 )
 
 func UpdateUser(c *gin.Context, db *gorm.DB) {
+
+	start := time.Now()
+
+	err := observability.Client.Incr("Update User API", nil, 1)
+	if err != nil {
+		log.Printf("Error incrementing Update User API count: %v", err)
+	}
 
 	if len(c.Request.URL.Query()) > 0 {
 		c.Status(http.StatusBadRequest)
@@ -88,10 +101,28 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 		user.Password = string(hashedPassword)
 	}
 
+	startdb := time.Now()
+
 	if err := db.Save(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 		return
 	}
 
+	durationdb := time.Since(startdb).Milliseconds()
+
+	err = observability.Client.Timing("api.response_time.UpdateUserAPIDataBase", time.Duration(durationdb)*time.Millisecond, nil, 1)
+
+	if err != nil {
+		log.Printf("Error recording Update User API DataBase timing: %v", err)
+	}
+
+	duration := time.Since(start).Milliseconds()
+
+	err = observability.Client.Timing("api.response_time.UpdateUserAPI", time.Duration(duration)*time.Millisecond, nil, 1)
+	if err != nil {
+		log.Printf("Error recording Update User API timing: %v", err)
+	}
+
 	c.Status(http.StatusNoContent)
+
 }

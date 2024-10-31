@@ -10,9 +10,20 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+
+	"webapp/observability"
+
+	"log"
 )
 
 func GetUser(c *gin.Context, db *gorm.DB) {
+
+	start := time.Now()
+
+	err := observability.Client.Incr("Get User API", nil, 1)
+    if err != nil {
+        log.Printf("Error incrementing Get User API count: %v", err)
+    }
 
 	if c.Request.Method != http.MethodGet {
 		c.Header("Allow", "GET")
@@ -63,5 +74,14 @@ func GetUser(c *gin.Context, db *gorm.DB) {
 		AccountUpdated: user.AccountUpdated,
 	}
 
+	duration := time.Since(start).Milliseconds()
+
+	err = observability.Client.Timing("api.response_time.GetUserAPI", time.Duration(100+duration)*time.Millisecond, nil, 1)
+
+    if err != nil {
+        log.Printf("Error recording Get User API timing: %v", err)
+    }
+
 	c.JSON(http.StatusOK, userInfo)
+	
 }

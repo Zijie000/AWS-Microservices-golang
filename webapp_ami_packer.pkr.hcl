@@ -50,9 +50,24 @@ source "amazon-ebs" "webapp" {
 build {
   sources = ["source.amazon-ebs.webapp"]
 
+  provisioner "shell" {
+    inline = [
+      "sudo apt-get update",
+      "sudo apt-get install -y curl",
+      "curl https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb -o amazon-cloudwatch-agent.deb",
+      "sudo dpkg -i amazon-cloudwatch-agent.deb",
+      "sudo systemctl enable amazon-cloudwatch-agent",
+    ]
+  }
+
   provisioner "file" {
     source      = "./webapp"
     destination = "/tmp/webapp"
+  }
+
+  provisioner "file" {
+    source      = "./amazon-cloudwatch-agent.json"
+    destination = "/tmp/amazon-cloudwatch-agent.json"
   }
 
   provisioner "shell" {
@@ -62,6 +77,21 @@ build {
       "sudo useradd -g csye6225 -s /usr/sbin/nologin csye6225",
       "sudo chown csye6225:csye6225 /opt/webapp",
       "sudo chmod 750 /opt/webapp",
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo mv /tmp/amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json",
+      "sudo chown csye6225:csye6225 /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json",
+      "sudo chmod 750 /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json",
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo touch /var/log/webapp.log",
+      "sudo chown csye6225:csye6225 /var/log/webapp.log",
     ]
   }
 
@@ -75,6 +105,13 @@ build {
       "sudo mv /tmp/webapp.service /etc/systemd/system/webapp.service",
       "sudo systemctl daemon-reload",
       "sudo systemctl enable webapp.service"
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable amazon-cloudwatch-agent.service"
     ]
   }
 }
