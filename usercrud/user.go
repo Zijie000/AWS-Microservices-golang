@@ -14,6 +14,15 @@ type User struct {
 	AccountUpdated time.Time `json:"account_updated" gorm:"autoUpdateTime"`
 }
 
+type UserCache struct {
+	Token          string    `json:"token" binding:"required" gorm:"unique;not null"`
+	Email          string    `json:"email" binding:"required" gorm:"unique;not null"`
+	Password       string    `json:"password" binding:"required" gorm:"not null"`
+	FirstName      string    `json:"first_name" binding:"required" gorm:"not null"`
+	LastName       string    `json:"last_name" binding:"required" gorm:"not null"`
+	AccountCreated time.Time `json:"account_created" binding:"required" gorm:"autoCreateTime;index"`
+}
+
 type UserUpdateForm struct {
 	ID             uint   `json:"id"`
 	Email          string `json:"email"`

@@ -25,6 +25,7 @@ func InitDB() (*gorm.DB, error) {
 	}
 
 	db.AutoMigrate(&usercrud.User{})
+	db.AutoMigrate(&usercrud.UserCache{})
 	db.AutoMigrate(&profilepic.Picture{})
 
 	return db, nil

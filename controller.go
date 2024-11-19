@@ -18,6 +18,8 @@ import (
 	"log"
 
 	"os"
+
+	"time"
 )
 
 var db *gorm.DB
@@ -42,6 +44,8 @@ func main() {
 		panic("Failed to connect to database!")
 	}
 
+	go clearExpiredRecords(db, 2*time.Minute, 2*time.Minute) //定时清除
+
 	r := gin.Default()
 
 	r.Any("/healthz", healthCheck)
@@ -57,6 +61,8 @@ func main() {
 	r.GET("/v1/user/self/pic", getPicture)
 
 	r.DELETE("/v1/user/self/pic", deletePicture)
+
+	r.GET("/verify/:token", verifyEmail)
 
 	r.POST("/v1/user/self", NotSupported)
 	r.DELETE("/v1/user/self", NotSupported)
@@ -117,4 +123,9 @@ func getPicture(c *gin.Context) {
 func deletePicture(c *gin.Context) {
 
 	profilepic.DeleteImage(c, db)
+}
+
+func verifyEmail(c *gin.Context) {
+
+	usercrud.VerifyUser(c, db)
 }

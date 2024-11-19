@@ -42,6 +42,12 @@ jobs:
       
       - name: Initialize packer
         run: packer init webapp_ami_packer.pkr.hcl
+
+      - name: Set timestamp for AMI name
+        id: set-timestamp
+        run: |
+          echo "AMI_TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+          echo "Generated AMI timestamp: ${{ env.AMI_TIMESTAMP }}"
       
       - name: Build AMI with Packer
         run: |
@@ -52,5 +58,59 @@ jobs:
             -var "ssh_username=${{ secrets.SSH_USER }}" \
             -var "ami_user=${{ secrets.AMI_USER }}" \
             -var "aws_profile=${{ secrets.AWS_PROFILE }}" \
-            -var "ami_name=${{ secrets.AMI_NAME }}" \
+            -var "ami_name=csye6225-${{ env.AMI_TIMESTAMP }}" \
             webapp_ami_packer.pkr.hcl
+      
+      - name: Get the latest AMI ID
+        id: latest-ami
+        run: |
+            LATEST_AMI=$(aws ec2 describe-images --owners self \
+            --filters "Name=name,Values=csye6225-*" \
+            --query "Images | sort_by(@, &CreationDate)[-1].ImageId" \
+            --output text) \
+            echo "LATEST_AMI=$LATEST_AMI" >> $GITHUB_ENV
+
+      - name: Create new Launch Template version
+        id: new-launch-template
+        run: |
+          NEW_VERSION=$(aws ec2 create-launch-template-version \
+          --launch-template-id ${{ secrets.LAUNCH_TEMPLATE_ID }} \
+          --source-version 1 \
+          --launch-template-data "{\"ImageId\":\"$LATEST_AMI\"}" \
+          --query "LaunchTemplateVersion.VersionNumber" 
+          --output text) \
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+      - name: Update Auto Scaling Group with new Launch Template version
+        run: |
+          aws autoscaling update-auto-scaling-group \
+          --auto-scaling-group-name ${{ secrets.SCALING_GROUP_NAME }} \
+          --launch-template "LaunchTemplateId=${{ secrets.LAUNCH_TEMPLATE_ID }},Version=$NEW_VERSION" \
+
+      - name: Start Instance Refresh
+        id: start-refresh
+        run: |
+          REFRESH_ID=$(aws autoscaling start-instance-refresh \
+          --auto-scaling-group-name ${{ secrets.SCALING_GROUP_NAME }} \
+          --query "InstanceRefreshId" --output text) \
+          echo "REFRESH_ID=$REFRESH_ID" >> $GITHUB_ENV
+
+      - name: Wait for Instance Refresh to complete
+        id: wait-refresh
+        run: |
+          STATUS="InProgress"
+          while [ "$STATUS" == "InProgress" ]; do
+            echo "Waiting for instance refresh to complete..."
+            sleep 30
+            STATUS=$(aws autoscaling describe-instance-refreshes \
+            --auto-scaling-group-name ${{ secrets.SCALING_GROUP_NAME }} \ 
+            --instance-refresh-ids $REFRESH_ID \
+            --query "InstanceRefreshes[0].Status" \ 
+            --output text) \
+            echo "Current status: $STATUS"
+          done
+
+          if [ "$STATUS" != "Successful" ]; then
+            echo "Instance refresh failed with status: $STATUS"
+            exit 1
+          fi
