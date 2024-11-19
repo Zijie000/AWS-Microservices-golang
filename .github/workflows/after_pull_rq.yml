@@ -85,7 +85,7 @@ jobs:
           --launch-template-id ${{ secrets.LAUNCH_TEMPLATE_ID }} \
           --source-version 1 \
           --launch-template-data "{\"ImageId\":\"$LATEST_AMI\"}" \
-          --query "LaunchTemplateVersion.VersionNumber" 
+          --query "LaunchTemplateVersion.VersionNumber" \
           --output text)
 
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
@@ -117,7 +117,7 @@ jobs:
             --instance-refresh-ids $REFRESH_ID \
             --query "InstanceRefreshes[0].Status" \ 
             --output text)
-            
+
             echo "Current status: $STATUS"
           done
 
