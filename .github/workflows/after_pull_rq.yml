@@ -67,7 +67,8 @@ jobs:
             LATEST_AMI=$(aws ec2 describe-images --owners self \
             --filters "Name=name,Values=csye6225-*" \
             --query "Images | sort_by(@, &CreationDate)[-1].ImageId" \
-            --output text) \
+            --output text)
+
             echo "LATEST_AMI=$LATEST_AMI" >> $GITHUB_ENV
       
       - name: Configure AWS Credentials for demo account
@@ -85,21 +86,23 @@ jobs:
           --source-version 1 \
           --launch-template-data "{\"ImageId\":\"$LATEST_AMI\"}" \
           --query "LaunchTemplateVersion.VersionNumber" 
-          --output text) \
+          --output text)
+
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Update Auto Scaling Group with new Launch Template version
         run: |
           aws autoscaling update-auto-scaling-group \
           --auto-scaling-group-name ${{ secrets.SCALING_GROUP_NAME }} \
-          --launch-template "LaunchTemplateId=${{ secrets.LAUNCH_TEMPLATE_ID }},Version=$NEW_VERSION" \
+          --launch-template "LaunchTemplateId=${{ secrets.LAUNCH_TEMPLATE_ID }},Version=$NEW_VERSION" 
 
       - name: Start Instance Refresh
         id: start-refresh
         run: |
           REFRESH_ID=$(aws autoscaling start-instance-refresh \
           --auto-scaling-group-name ${{ secrets.SCALING_GROUP_NAME }} \
-          --query "InstanceRefreshId" --output text) \
+          --query "InstanceRefreshId" --output text)
+
           echo "REFRESH_ID=$REFRESH_ID" >> $GITHUB_ENV
 
       - name: Wait for Instance Refresh to complete
@@ -113,7 +116,8 @@ jobs:
             --auto-scaling-group-name ${{ secrets.SCALING_GROUP_NAME }} \ 
             --instance-refresh-ids $REFRESH_ID \
             --query "InstanceRefreshes[0].Status" \ 
-            --output text) \
+            --output text)
+            
             echo "Current status: $STATUS"
           done
 
