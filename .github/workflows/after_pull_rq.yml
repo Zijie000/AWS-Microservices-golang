@@ -113,9 +113,9 @@ jobs:
             echo "Waiting for instance refresh to complete..."
             sleep 30
             STATUS=$(aws autoscaling describe-instance-refreshes \
-            --auto-scaling-group-name ${{ secrets.SCALING_GROUP_NAME }} \ 
+            --auto-scaling-group-name ${{ secrets.SCALING_GROUP_NAME }} \
             --instance-refresh-ids $REFRESH_ID \
-            --query "InstanceRefreshes[0].Status" \ 
+            --query "InstanceRefreshes[0].Status" \
             --output text)
 
             echo "Current status: $STATUS"
