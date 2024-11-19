@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Configure AWS Credentials
+      - name: Configure AWS Credentials for dev account
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -69,6 +69,13 @@ jobs:
             --query "Images | sort_by(@, &CreationDate)[-1].ImageId" \
             --output text) \
             echo "LATEST_AMI=$LATEST_AMI" >> $GITHUB_ENV
+      
+      - name: Configure AWS Credentials for demo account
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_2 }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_2 }}
+          aws-region: us-east-1
 
       - name: Create new Launch Template version
         id: new-launch-template

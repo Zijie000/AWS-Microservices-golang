@@ -177,10 +177,12 @@ func RegisterUser(c *gin.Context, db *gorm.DB) {
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`
 		Email     string `json:"email"`
+		Test      string `json:"test"`
 	}{
 		FirstName: userCache.FirstName,
 		LastName:  userCache.LastName,
 		Email:     userCache.Email,
+		Test:      "hello",
 	}
 
 	duration := time.Since(start).Milliseconds()
