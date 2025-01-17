@@ -1,7 +1,3 @@
-# webapp
-This is for csye6225 project!
-
-
 ## 🧙‍♂️Prerequisites
 
 🪄You need to install 🦫golang 1.10 ~ 1.23
